@@ -1,5 +1,7 @@
-﻿using DemoAPI.Models.Domain;
+﻿using DemoAPI.Data;
+using DemoAPI.Models.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DemoAPI.Controllers
@@ -8,11 +10,38 @@ namespace DemoAPI.Controllers
     [ApiController]
     public class RegionsController : ControllerBase
     {
-        public RegionsController() { }
+        private readonly NzWalksDbContext dbContext;
+        public RegionsController(NzWalksDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
 
         [HttpGet]
 
-        public IActionResult GetAll() 
+        public IActionResult GetAll()
+        {
+            var regions = dbContext.Regions.ToList();
+            return Ok(regions);
+
+        }
+
+        [HttpGet]
+        [Route ("{id:guid}")]
+
+        public IActionResult GetByID([FromRoute] Guid id)
+        {
+
+            var regions = dbContext.Regions.Find(id);
+
+        if (regions == null)
+        {
+            return NotFound();
+        }
+            return Ok(regions);
+
+        }
+
+        /*public IActionResult GetAll() 
         {
             var regions = new List<Region>
             {
@@ -34,7 +63,7 @@ namespace DemoAPI.Controllers
                 },
                 new Region
                 {
-                    Id=new Guid(),
+                    Id=Guid.NewGuid(),
                     RegionName="Auckland",
                     RegionCode="AUK",
                     RegionImageURL=""
@@ -44,8 +73,8 @@ namespace DemoAPI.Controllers
 
             };
             return Ok(regions);
-        }
+        }*/
 
-        
+
     }
 }
