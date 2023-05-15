@@ -27,36 +27,20 @@ namespace DemoAPI.Controllers
         }
 
         [HttpGet]
-        [Route ("{id:guid}")]
+        [Route ("{id:Guid}")]
 
         public IActionResult GetByID([FromRoute] Guid id)
         {
             //get data from database
-            var regions = dbContext.Regions.ToList();
-            
-
             //var regions= dbContext.Regions.FirstOrDefault(x=>x.Id==id);
-            //var regions = dbContext.Regions.Find(id);
+            var regions = dbContext.Regions.Find(id);
 
-            //map domain to DTOs
-            var regionDto = new List<RegionsDTO>();
-
-            foreach (var region in regions) 
-            {
-                regionDto.Add(new RegionsDTO()
-                {
-                    Id = region.Id,
-                    RegionName = region.RegionName,
-                    RegionCode = region.RegionCode,
-                    RegionImageURL = region.RegionImageURL
-                });
+            if (regions == null) 
+            { 
+            return NotFound();
             }
 
-        if (regions == null)
-        {
-            return NotFound();
-        }
-            return Ok(regionDto);
+            return Ok(regions);
 
         }
 
@@ -115,6 +99,32 @@ namespace DemoAPI.Controllers
             return Ok(regionDTO);
 
         }
+        [HttpDelete]
+        [Route("{id:Guid}")]
+
+        public IActionResult DeleteRegion([FromRoute] Guid id)
+        {
+            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+
+            if (regionDomainModel == null)
+            {
+                return NotFound();
+            }
+
+            dbContext.Regions.Remove(regionDomainModel);
+
+            dbContext.SaveChanges();
+
+            var regionDTO = new RegionsDTO
+            {
+                Id = regionDomainModel.Id,
+                RegionCode = regionDomainModel.RegionCode,
+                RegionName = regionDomainModel.RegionName,
+                RegionImageURL = regionDomainModel.RegionImageURL
+            };
+
+            return Ok(regionDTO);
+            }
         /*public IActionResult GetAll() 
         {
             var regions = new List<Region>
