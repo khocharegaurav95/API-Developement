@@ -4,6 +4,7 @@ using DemoAPI.Models.RegionDTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DemoAPI.Controllers
 {
@@ -19,9 +20,9 @@ namespace DemoAPI.Controllers
 
         [HttpGet]
 
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var regions = dbContext.Regions.ToList();
+            var regions = await dbContext.Regions.ToListAsync();
             return Ok(regions);
 
         }
@@ -29,11 +30,11 @@ namespace DemoAPI.Controllers
         [HttpGet]
         [Route ("{id:Guid}")]
 
-        public IActionResult GetByID([FromRoute] Guid id)
+        public async Task<IActionResult> GetByID([FromRoute] Guid id)
         {
             //get data from database
             //var regions= dbContext.Regions.FirstOrDefault(x=>x.Id==id);
-            var regions = dbContext.Regions.Find(id);
+            var regions =await dbContext.Regions.FindAsync(id);
 
             if (regions == null) 
             { 
@@ -46,7 +47,7 @@ namespace DemoAPI.Controllers
 
 
         [HttpPost]
-        public IActionResult CreateNewRegion([FromBody] AddRegionRequestDTO addRegionRequestDTO)
+        public async Task<IActionResult> CreateNewRegion([FromBody] AddRegionRequestDTO addRegionRequestDTO)
         {
 
             var regionDomainModel = new Region
@@ -56,8 +57,8 @@ namespace DemoAPI.Controllers
                 RegionImageURL=addRegionRequestDTO.RegionImageURL
             };
 
-            dbContext.Regions.Add(regionDomainModel);
-            dbContext.SaveChanges();
+            await dbContext.Regions.AddAsync(regionDomainModel);
+            await dbContext.SaveChangesAsync();
 
             var regionDto = new RegionsDTO
             {
@@ -73,9 +74,9 @@ namespace DemoAPI.Controllers
 
         [HttpPut]
         [Route("{id:Guid}")]
-        public IActionResult UpdateRegionData([FromRoute] Guid id,[FromBody]UpdateRegionDataRequestDTO updateRegionDataRequestDTO)
+        public async Task<IActionResult> UpdateRegionData([FromRoute] Guid id,[FromBody]UpdateRegionDataRequestDTO updateRegionDataRequestDTO)
         {
-            var regionsDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionsDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if (regionsDomainModel == null)
             { 
@@ -86,7 +87,7 @@ namespace DemoAPI.Controllers
             regionsDomainModel.RegionName = updateRegionDataRequestDTO.RegionName;
             regionsDomainModel.RegionImageURL= updateRegionDataRequestDTO.RegionImageURL;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             var regionDTO = new RegionsDTO
             {
@@ -102,9 +103,9 @@ namespace DemoAPI.Controllers
         [HttpDelete]
         [Route("{id:Guid}")]
 
-        public IActionResult DeleteRegion([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
         {
-            var regionDomainModel = dbContext.Regions.FirstOrDefault(x => x.Id == id);
+            var regionDomainModel = await dbContext.Regions.FirstOrDefaultAsync(x => x.Id == id);
 
             if (regionDomainModel == null)
             {
@@ -113,7 +114,7 @@ namespace DemoAPI.Controllers
 
             dbContext.Regions.Remove(regionDomainModel);
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             var regionDTO = new RegionsDTO
             {
